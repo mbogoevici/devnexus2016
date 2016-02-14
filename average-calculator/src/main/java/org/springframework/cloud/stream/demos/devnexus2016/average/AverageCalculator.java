@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.rxjava.EnableRxJavaProcessor;
 import org.springframework.cloud.stream.annotation.rxjava.RxJavaProcessor;
 import org.springframework.cloud.stream.tuple.Tuple;
@@ -34,6 +35,7 @@ import org.springframework.context.annotation.Bean;
  */
 @SpringBootApplication
 @EnableRxJavaProcessor
+@EnableConfigurationProperties(AverageCalculatorProperties.class)
 public class AverageCalculator {
 
 	@Autowired
