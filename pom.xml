@@ -9,6 +9,7 @@
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<modules>
 		<module>average-calculator</module>
+		<module>top-sensors</module>
 	</modules>
 	<packaging>pom</packaging>
 
