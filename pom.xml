@@ -10,6 +10,7 @@
 	<modules>
 		<module>average-calculator</module>
 		<module>top-sensors</module>
+		<module>data-generator</module>
 	</modules>
 	<packaging>pom</packaging>
 

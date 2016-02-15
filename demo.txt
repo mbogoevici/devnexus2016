@@ -15,4 +15,9 @@ Observe the top 3 sensors being displayed in the sink
 
 6. Create a web socket app that displays that data (TBD)
 
-7. Replace the script with the data-generator web app (TBD)
+7. Replace the script with the data-generator web app
+
+The data generator is in the `data-generator` project, once started it will create a number of sensor publishers (configurable via the `sensorCount` parameter) which start at a default value,
+sending data to a specific URL.
+
+A post in the form `{"sensorId":0,"temperature":7}` will update the value posted by the app.
