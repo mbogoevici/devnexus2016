@@ -1,0 +1,18 @@
+1. Create an HTTP source
+java -jar http-source/target/http-source-1.0.0.BUILD-SNAPSHOT-exec.jar --server.port=9000 --spring.cloud.stream.bindings.output.destination=raw-sensor-data
+
+2. Create a log sink
+java -jar log-sink/target/log-sink-1.0.0.BUILD-SNAPSHOT-exec.jar --server.port=0 --spring.cloud.stream.bindings.input.destination=top-values
+
+3. Create the Top N processor
+java -jar top-sensors/target/top-sensors-1.0.0.BUILD-SNAPSHOT.jar --spring.cloud.stream.bindings.input.destination=averages --spring.cloud.stream.bindings.output.destination=top-values --server.port=0 --spring.cloud.stream.bindings.input.contentType=application/x-spring-tuple --spring.cloud.stream.bindings.output.contentType=application/json
+
+4. Create the Average Calculator
+java -jar average-calculator/target/average-calculator-1.0.0.BUILD-SNAPSHOT.jar --server.port=0 --spring.cloud.stream.bindings.input.destination=raw-sensor-data --spring.cloud.stream.bindings.input.contentType=application/x-spring-tuple --spring.cloud.stream.bindings.output.destination=averages --spring.cloud.stream.binding.output.contentType=application/json
+
+5. Run data-generator.sh
+Observe the top 3 sensors being displayed in the sink
+
+6. Create a web socket app that displays that data (TBD)
+
+7. Replace the script with the data-generator web app (TBD)
