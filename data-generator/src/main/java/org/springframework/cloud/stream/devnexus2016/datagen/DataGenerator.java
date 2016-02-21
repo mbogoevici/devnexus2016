@@ -41,7 +41,7 @@ public class DataGenerator {
 
 	private String url = "http://localhost:9000";
 
-	private int sensorCount = 5;
+	private int sensorCount = 10;
 
 	private double initialValue = 10.0;
 
@@ -70,15 +70,20 @@ public class DataGenerator {
 	}
 
 	@RequestMapping(path = "/sensors", method = RequestMethod.POST)
-	public HttpStatus updateValue(@RequestBody  SensorData sensorData) {
+	public HttpEntity<?> updateValue(@RequestBody  SensorData sensorData) {
 		if (sensorData.getSensorId() < 0) {
-			return HttpStatus.BAD_REQUEST;
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		if (sensorData.getSensorId() >= sensorCount) {
-			return HttpStatus.NOT_FOUND;
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		this.sensorData[sensorData.getSensorId()] = sensorData;
-		return HttpStatus.ACCEPTED;
+		return new ResponseEntity<>(HttpStatus.ACCEPTED);
+	}
+
+	@RequestMapping(path = "/sensors", method = RequestMethod.GET)
+	public SensorData[] updateValue() {
+		return sensorData;
 	}
 
 

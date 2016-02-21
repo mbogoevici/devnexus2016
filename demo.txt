@@ -5,19 +5,59 @@ java -jar http-source/target/http-source-1.0.0.BUILD-SNAPSHOT-exec.jar --server.
 java -jar log-sink/target/log-sink-1.0.0.BUILD-SNAPSHOT-exec.jar --server.port=0 --spring.cloud.stream.bindings.input.destination=top-values
 
 3. Create the Top N processor
-java -jar top-sensors/target/top-sensors-1.0.0.BUILD-SNAPSHOT.jar --spring.cloud.stream.bindings.input.destination=averages --spring.cloud.stream.bindings.output.destination=top-values --server.port=0 --spring.cloud.stream.bindings.input.contentType=application/x-spring-tuple --spring.cloud.stream.bindings.output.contentType=application/json
+java -jar top-sensors/target/top-sensors-1.0.0.BUILD-SNAPSHOT.jar --spring.cloud.stream.bindings.input.destination=averages --spring.cloud.stream.bindings.output.destination=top-values --server.port=0 --spring.cloud.stream.bindings.input.contentType=application/x-spring-tuple --spring.cloud.stream.bindings.output.contentType=text/plain
 
 4. Create the Average Calculator
-java -jar average-calculator/target/average-calculator-1.0.0.BUILD-SNAPSHOT.jar --server.port=0 --spring.cloud.stream.bindings.input.destination=raw-sensor-data --spring.cloud.stream.bindings.input.contentType=application/x-spring-tuple --spring.cloud.stream.bindings.output.destination=averages --spring.cloud.stream.binding.output.contentType=application/json
+java -jar average-calculator/target/average-calculator-1.0.0.BUILD-SNAPSHOT.jar --server.port=0 --spring.cloud.stream.bindings.input.destination=raw-sensor-data --spring.cloud.stream.bindings.input.contentType=application/x-spring-tuple --spring.cloud.stream.bindings.output.destination=averages --spring.cloud.stream.bindings.output.contentType=application/json
 
-5. Run data-generator.sh
-Observe the top 3 sensors being displayed in the sink
+5. Run data-generator
 
-6. Create a web socket app that displays that data (TBD)
-
-7. Replace the script with the data-generator web app
+6. Replace the script with the data-generator web app
 
 The data generator is in the `data-generator` project, once started it will create a number of sensor publishers (configurable via the `sensorCount` parameter) which start at a default value,
 sending data to a specific URL.
 
+7. Create a web socket app that displays that data (TBD)
+
+a) Add @EnableBinding
+
+b) Add SimpMessageTemplate
+
+c) send to template
+
+	@ServiceActivator(inputChannel = Sink.INPUT)
+	public void sendUpdates(Message<?> message) {
+		messagingTemplate.convertAndSend("/topic/topvalues",message.getPayload());
+	}
+
+
+d) create WebSocket config
+
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry config) {
+		config.enableSimpleBroker("/topic");
+	}
+
+	@Override
+	public void registerStompEndpoints(StompEndpointRegistry registry) {
+		registry.addEndpoint("/stomp").setAllowedOrigins("*").withSockJS();
+	}
+
+}
+
+e) copy javascript files
+
+curl -i -H "Accept: application/json" -H "Content-Type:application/json" -d '{"sensorId":"0", "temperature":"50"}' -X POST http://localhost:8080/sensors
+
 A post in the form `{"sensorId":0,"temperature":7}` will update the value posted by the app.
+
+
+module register --name top-values --type processor --coordinates org.springframework.cloud.stream.demos.devnexus2016:top-sensors:1.0.0.BUILD-SNAPSHOT
+
+module register --name averages --type processor --coordinates org.springframework.cloud.stream.demos.devnexus2016:average-calculator:1.0.0.BUILD-SNAPSHOT
+
+stream create demoflow --definition "http --server.port=9000 | averages | top-values | log"
