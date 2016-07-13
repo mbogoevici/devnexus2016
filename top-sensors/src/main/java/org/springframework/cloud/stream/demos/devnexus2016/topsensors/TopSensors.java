@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.stream.demos.devnexus2016.topsensors;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.springframework.cloud.stream.tuple.TupleBuilder.tuple;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +26,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.rxjava.EnableRxJavaProcessor;
 import org.springframework.cloud.stream.annotation.rxjava.RxJavaProcessor;
-import org.springframework.cloud.stream.tuple.Tuple;
 import org.springframework.context.annotation.Bean;
+import org.springframework.tuple.Tuple;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.springframework.tuple.TupleBuilder.tuple;
 
 /**
  * @author Marius Bogoevici
@@ -50,12 +50,13 @@ public class TopSensors {
 	@Bean
 	public RxJavaProcessor<Tuple,Tuple> processor() {
 		return inputStream -> inputStream
-				.window(topSensorsProperties.getTimeWindowLength(), MILLISECONDS)
+				.window(this.topSensorsProperties.getTimeWindowLength(), MILLISECONDS)
 				.flatMap(w ->
 						w.groupBy(t -> t.getInt("sensorId"))
 								.flatMap(g -> g.last())
 								.toSortedList(TopSensors::compareTemperatures)
-								.map(l -> l.subList(0, Math.min(topSensorsProperties.getMaxTopSensors(), l.size())))
+								.map(l -> l
+										.subList(0, Math.min(this.topSensorsProperties.getMaxTopSensors(), l.size())))
 								.map(l -> tuple().of("hottest", asMap(l))));
 	}
 

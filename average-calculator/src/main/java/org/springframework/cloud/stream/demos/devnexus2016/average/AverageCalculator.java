@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.stream.demos.devnexus2016.average;
 
-import static org.springframework.cloud.stream.tuple.TupleBuilder.tuple;
-import static rx.observables.MathObservable.averageDouble;
-
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +24,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.rxjava.EnableRxJavaProcessor;
 import org.springframework.cloud.stream.annotation.rxjava.RxJavaProcessor;
-import org.springframework.cloud.stream.tuple.Tuple;
 import org.springframework.context.annotation.Bean;
+import org.springframework.tuple.Tuple;
+
+import static org.springframework.tuple.TupleBuilder.tuple;
+import static rx.observables.MathObservable.averageDouble;
 
 /**
  * @author Marius Bogoevici
@@ -49,8 +49,8 @@ public class AverageCalculator {
 	@Bean
 	public RxJavaProcessor<Tuple,Tuple> processor() {
 		return inputStream -> inputStream
-				.window(averageCalculatorProperties.getTimeWindowLength(),
-						averageCalculatorProperties.getTimeWindowShift(),
+				.window(this.averageCalculatorProperties.getTimeWindowLength(),
+						this.averageCalculatorProperties.getTimeWindowShift(),
 						TimeUnit.MILLISECONDS)
 				.flatMap(w -> w.groupBy(data -> data.getInt("sensorId"))
 								.flatMap(
